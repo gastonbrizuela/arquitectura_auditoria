@@ -1,0 +1,41 @@
+services:
+
+  # ─────────────────────────────────────────
+  # PostgreSQL (Alpine = imagen liviana ~80MB)
+  # ─────────────────────────────────────────
+  auditoria-db:
+    image: postgres:16-alpine
+    container_name: auditoria-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auditoria_db
+      POSTGRES_USER: auditoria_user
+      POSTGRES_PASSWORD: auditoriañ_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - auditoria_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auditoria_user -d auditoria_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  auditoria:
+    build:
+      context: ./auditoria
+      dockerfile: Dockerfile
+    container_name: auditoria-service
+    restart: unless-stopped
+    depends_on:
+      auditoria-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auditoria-db:5432/auditoria_db
+      SPRING_DATASOURCE_USERNAME: auditoria_user
+      SPRING_DATASOURCE_PASSWORD: auditoria_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_FLYWAY_ENABLED: "true"
+    ports:
+      - "8081:8081"
+volumes:
+  auditoria_db_data:
