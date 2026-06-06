@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: auditoria_db
       POSTGRES_USER: auditoria_user
-      POSTGRES_PASSWORD: auditoriañ_pass
+      POSTGRES_PASSWORD: auditoria_pass
     ports:
       - "5433:5432"
     volumes:
